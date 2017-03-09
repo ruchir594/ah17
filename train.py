@@ -35,8 +35,10 @@ while i<len(x):
     x[i]=x[i][:-1] # ---- removing '\n' ----
     i=i+1
 
+# ------------- Fitting on all dataset -----------------------------------------
+# ------------- Hence taking both training_data.tsv & eval_text ----------------
 X_all = X + x
-
+# ------ This is done so matrix size matches while .(dot) multiplication -------
 def naive():
     #print len(X), len(X_train), len(X_test)
     #print len(y), len(y_train), len(y_test)
@@ -96,5 +98,5 @@ def naive():
     print 'precision', precision
     print 'recall ', recall
     print '----------------'
-
+    
 naive()

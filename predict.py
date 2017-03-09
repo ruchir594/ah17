@@ -2,6 +2,9 @@ from sklearn.externals import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
+# common global variables
+# helpful in ensembling
+
 with open('data/training_impro.tsv','r') as tsv:
     mat = [line.strip().split('\t') for line in tsv]
 # ignoring first row of data x,y
@@ -22,12 +25,13 @@ while i<len(x):
     x[i]=x[i][:-1] # ---- removing '\n' ----
     i=i+1
 
-X_all = X + x
 
+# ------------- Fitting on all dataset -----------------------------------------
+# ------------- Hence taking both training_data.tsv & eval_text ----------------
+X_all = X + x
 count_vect = CountVectorizer()
 count_vect.fit(X_all)
 X_all_counts = count_vect.transform(X_all)
-
 tfidf_transformer = TfidfTransformer().fit(X_all_counts)
 
 def classify():
@@ -50,5 +54,57 @@ def classify():
     predicted = clf.predict(X_test_tfidf)
     print len(x), len(predicted)
     #print predicted
+
+def get_postagging(parsedData):
+    full_pos = []
+    sent = []
+    for span in parsedData.sents:
+        sent = sent + [parsedData[i] for i in range(span.start, span.end)]
+        #break
+
+    for token in sent:
+        full_pos.append([token.orth_, token.pos_])
+    return full_pos
+
+def get_dependency(parsedEx):
+    # Let's look at the dependencies of this example:
+    # shown as: original token, dependency tag, head word, left dependents, right dependents
+    full_dep = []
+    for token in parsedEx:
+        full_dep.append([token.orth_, token.dep_, token.head.orth_, [t.orth_ for t in token.lefts], [t.orth_ for t in token.rights]])
+    return full_dep
+
+from nltk import CFG
+
+grammar = CFG.fromstring("""
+	 S -> NP VP
+	 PP -> P NP
+	 NP -> 'the' N | N PP | 'the' N PP
+	 VP -> V NP | V PP | V NP PP
+	 N -> 'cat'
+	 N -> 'dog'
+	 N -> 'rug'
+	 V -> 'chased'
+	 V -> 'sat'
+	 P -> 'in'
+	 P -> 'on'
+	 """)
+from nltk.parse import ShiftReduceParser
+sr = ShiftReduceParser(grammar)
+'''from spacy.en import English
+parser = English()'''
+def reminder_phrase(each_ex):
+    # --- input: <String> each_ex
+    # --- return: <String> rem_ex
+    for t in rd.parse(each_ex.split()):
+        print t
+    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
+reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
+reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
+reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
+reminder_phrase('')
+
 
 classify()
