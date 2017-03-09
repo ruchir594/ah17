@@ -2,6 +2,13 @@ from sklearn.externals import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
+from nltk.parse.stanford import StanfordDependencyParser
+path_to_jar = '../../LBS/LBS-X/lib/stanford-parser/stanford-parser.jar'
+path_to_models_jar = '../../LBS/LBS-X/lib/stanford-parser/stanford-parser-3.6.0-models.jar'
+dependency_parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
+from nltk.parse.stanford import StanfordParser
+parser=StanfordParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
+
 # common global variables
 # helpful in ensembling
 
@@ -74,12 +81,12 @@ def get_dependency(parsedEx):
         full_dep.append([token.orth_, token.dep_, token.head.orth_, [t.orth_ for t in token.lefts], [t.orth_ for t in token.rights]])
     return full_dep
 
-from stat_parser import Parser
-parser = Parser()
 def reminder_phrase(each_ex):
     # --- input: <String> each_ex
     # --- return: <String> rem_ex
-    print parser.parse(each_ex)
+    #result = dependency_parser.raw_parse(each_ex)
+    #dep = result.next()
+    print list(parser.raw_parse(each_ex))
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
