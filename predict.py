@@ -86,14 +86,17 @@ def reminder_phrase(each_ex):
     # --- return: <String> rem_ex
     #result = dependency_parser.raw_parse(each_ex)
     #dep = result.next()
-    print list(parser.raw_parse(each_ex))
+    a = list(parser.raw_parse(each_ex))
+    # NLTK tree
+    pt = a[0]
+    print type(a[0]), len(a[0])
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
-reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
-reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
-reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
-reminder_phrase('')
+#reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
+#reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
+#reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
+#reminder_phrase('')
 
 
-classify()
+#classify()
