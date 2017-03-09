@@ -74,30 +74,12 @@ def get_dependency(parsedEx):
         full_dep.append([token.orth_, token.dep_, token.head.orth_, [t.orth_ for t in token.lefts], [t.orth_ for t in token.rights]])
     return full_dep
 
-from nltk import CFG
-
-grammar = CFG.fromstring("""
-	 S -> NP VP
-	 PP -> P NP
-	 NP -> 'the' N | N PP | 'the' N PP
-	 VP -> V NP | V PP | V NP PP
-	 N -> 'cat'
-	 N -> 'dog'
-	 N -> 'rug'
-	 V -> 'chased'
-	 V -> 'sat'
-	 P -> 'in'
-	 P -> 'on'
-	 """)
-from nltk.parse import ShiftReduceParser
-sr = ShiftReduceParser(grammar)
-'''from spacy.en import English
-parser = English()'''
+from stat_parser import Parser
+parser = Parser()
 def reminder_phrase(each_ex):
     # --- input: <String> each_ex
     # --- return: <String> rem_ex
-    for t in rd.parse(each_ex.split()):
-        print t
+    print parser.parse(each_ex)
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
