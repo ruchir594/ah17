@@ -11,6 +11,7 @@ parser=StanfordParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models
 
 from nltk.tree import ParentedTree
 import re, nltk
+import numpy as np
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 def getWords(data):
@@ -68,8 +69,12 @@ def classify():
 
     predicted = clf.predict(X_test_tfidf)
     print len(x), len(predicted)
+    print np.count_nonzero(predicted)
+    with open('raw_pred.txt','w') as f:
+        for each in predicted:
+            f.write(str(each)+'\n')
     #print predicted
-    reminder_text = []
+    """reminder_text = []
     i=0
     with open('raw_eval.txt', 'w') as rev:
         for each in predicted:
@@ -87,6 +92,16 @@ def classify():
         i=0
         while i < len(x):
             f.write(x[i] + '\t' + reminder_phrase[i] + '\n' )
+            i=i+1"""
+
+def pred_all_eval():
+    with open('data/eval_data.txt', 'r') as f:
+        x = f.readlines()
+    i=0
+    with open('raw_eval.txt', 'w') as rev:
+        for each in x:
+            rev.write(str(reminder_phrase(re.sub(r'[^\x00-\x7f]',r'', x[i])))+'\n')
+            print i
             i=i+1
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -237,4 +252,5 @@ print reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
 #print reminder_phrase('')
 
 
-#classify()
+classify()
+pred_all_eval()
