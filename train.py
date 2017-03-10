@@ -8,6 +8,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.externals import joblib
+from collections import Counter
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -297,3 +298,72 @@ svm()
 mlp()
 ada()
 svm_nl()
+
+
+def ens_x_text():
+    clf1 = joblib.load('models/nb.pkl')
+    clf2 = joblib.load('models/svm.pkl')
+    clf3 = joblib.load('models/svm_nl.pkl')
+    clf4 = joblib.load('models/nn.pkl')
+    clf5 = joblib.load('models/adaboost.pkl')
+    with open('data/eval_data.txt', 'r') as f:
+        x = f.readlines()
+    i=0
+    while i<len(x):
+        x[i]=unicode(x[i][:-1],'utf-8') # ---- removing '\n' ----
+        i=i+1
+    print len(x), type(x)
+
+    # ------------- transform TFIDF --------------------------------------------
+
+    X_test_counts = count_vect.transform(X_test)
+    print X_test_counts.shape
+    X_test_tfidf = tfidf_transformer.transform(X_test_counts)
+    print X_test_tfidf.shape
+
+    predicted1 = clf1.predict(X_test_tfidf)
+    predicted2 = clf2.predict(X_test_tfidf)
+    predicted3 = clf3.predict(X_test_tfidf)
+    predicted4 = clf4.predict(X_test_tfidf)
+    predicted5 = clf5.predict(X_test_tfidf)
+    print len(x), len(predicted1)
+    predicted=[]
+    with open('raw_pred_ens.txt','w') as f:
+        # ~~ as Section 1.6.U in ./docs/approach, a voting of 5 best algo takes place
+        for w1,w2,w3,w4,w5 in zip(predicted1, predicted2, predicted3, predicted4, predicted5):
+            c = Counter([w2,w3,w4,w5]) notice, counting vote of only 4 !!!!!!!!
+            value, count = c.most_common()[0]
+            predicted.append(value)
+    print len(predicted)
+    # -------------checking quality of classifier------------------------------
+
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    j = 0
+    while j < len(X_test):
+        if predicted[j] == 0 and y_test[j] == 0:
+            tn = tn + 1
+        if predicted[j] == 0 and y_test[j] == 1:
+            fn = fn + 1
+        if predicted[j] == 1 and y_test[j] == 1:
+            tp = tp + 1
+        if predicted[j] == 1 and y_test[j] == 0:
+            fp = fp + 1
+        j = j + 1
+    print 'tp ', tp
+    print 'tn ', tn
+    print 'fp ', fp
+    print 'fn ', fn
+    precision = (float(tp)) / (float(tp) + float(fp))
+    recall = (float(tp)) / (float(tp) + float(fn))
+    F1 = 2*precision*recall/(precision+recall)
+    accuracy = float(tp+tn) / float(tp+tn+fp+fn)
+    print 'accuracy ', accuracy
+    print 'F1 ', F1
+    print 'precision', precision
+    print 'recall ', recall
+    print '----------------'
+
+#ens_x_text()

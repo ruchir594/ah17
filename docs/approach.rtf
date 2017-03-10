@@ -66,7 +66,7 @@ recall  0.891860465116
 
 \f0\b Step 2:
 \f1\b0  
-\f0\b Parser
+\f0\b Parsing
 \f1\b0 \
 \
 
@@ -265,7 +265,7 @@ precision 0.864032539221\
 recall  0.864534883721\
 \
 
-\f0\b 1.5.U Badly Performed Classifier
+\f0\b 1.5.U Badly Performed Classifier(s)
 \f1\b0 \
 \
 KNN and Random Forest Performed Badly.\
@@ -276,6 +276,28 @@ KNN and Random Forest Performed Badly.\
 \
 Kaggle defines Ensembling as a general term for combining various classifier by averaging or voting. We will be voting. The Netflix Prize, a first of its kind competition made the Ensembling famous. \
 \
-We are going to make 5 of our top performing classifiers to vote on final prediction out of Step 1, I.e. to determine if a reminder text has been found or not. \
+We are going to make 4 of our top performing classifiers to vote on final prediction out of Step 1, I.e. to determine if a reminder text has been found or not. \
+\
+2819\
+tp  1526\
+tn  893\
+fp  206\
+fn  194\
+accuracy  0.858105711245\
+F1  0.884125144844\
+precision 0.881062355658\
+recall  0.887209302326\
+\
+
+\f0\b Conclusion \
+\
+
+\f1\b0 In code, For classifier, first thing we do is squash the training_data\'92s labels to \'93Found\'94 and \'93Not Found\'94. \
+
+\f0\b \
+
+\f1\b0 In code, note that we run parser on eval_data.txt independently, and only once. This allows us to run classifier independently and save time as whenever classifier predicts 1 on message text, corresponding reminder text need not be calculated again using Stanford parser as it is heavy. \
+\
+The accuracy average accuracy is around 0.83.  \
 \
 }

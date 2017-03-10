@@ -111,12 +111,11 @@ def classify(model_name):
 
 # input
 # reads 6 files.
-# Five predefined model
-# 1. Naive Bayes
-# 2. Linear SVM
-# 3. RBF svm
-# 4. MultiLayer Perceptron
-# 5. Adaboost
+# Four predefined model
+# 1. Linear SVM
+# 2. RBF svm
+# 3. MultiLayer Perceptron
+# 4. Adaboost
 
 # and the eval_data file
 
@@ -162,7 +161,7 @@ def ensemble():
     with open('raw_pred_ens.txt','w') as f:
         # ~~ as Section 1.6.U in ./docs/approach, a voting of 5 best algo takes place
         for w1,w2,w3,w4,w5 in zip(predicted1, predicted2, predicted3, predicted4, predicted5):
-            c = Counter([w1,w2,w3,w4,w5])
+            c = Counter([w2,w3,w4,w5]) #notice, counting vote of only 4 !!!!!!!!
             value, count = c.most_common()[0]
             f.write(str(value)+'\n')
 # ------------------------------------------------------------------------------

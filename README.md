@@ -3,21 +3,22 @@
 ### To understand the approach, head to [docs/approach.rtf](https://github.com/ruchir594/ah17/blob/master/docs/approach.rtf) in this repo.
 
 ## Adding files
-Make a directory "data" in this repo.
-Add following files...
-> training_data.tsv
-> eval_data.tsv
+### Make a directory "data" in this repo.
+### Add following files...
+  training_data.tsv
+
+  eval_data.tsv
 
 run
 ```
 python convert.py
 ```
+this will make a new TSV training_impro.tsv in ./data repository. This basically trims the training_data's second column to only "Found" or "Not Found"
+
 Also run
 ```
 pip install -r requirements.txt
 ```
-this will make a new TSV training_impro.tsv in ./data repository
-
 Download Stanford [Dependency Parser](http://nlp.stanford.edu/software/lex-parser.shtml#Download) if you do not have already.
 
 # Customization
@@ -48,10 +49,13 @@ or run 5 classifier in file train.py, and run predict.py to predict best classif
 
 then run clean.py.
 
-running
+directly running following will work too.
 ```
 python train.py
 python predict.py
 python clean.py
 ```
 will make a TSV in current directory named eval_pred_ens.tsv
+
+This TSV is the final classification on the given test data.
+This TSV is already present in the repo.
