@@ -292,8 +292,8 @@ def svm_nl():
     print 'precision', precision
     print 'recall ', recall
     print '----------------'
-#naive()
-#svm()
-#mlp()
-#ada()
+naive()
+svm()
+mlp()
+ada()
 svm_nl()
