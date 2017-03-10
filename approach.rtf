@@ -1,9 +1,177 @@
 {\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf810
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+{\fonttbl\f0\fnil\fcharset0 Menlo-Bold;\f1\fnil\fcharset0 Menlo-Regular;\f2\fnil\fcharset0 Menlo-Italic;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;}
+{\*\expandedcolortbl;;\csgray\c0;\csgray\c100000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww19180\viewh11380\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 Step 1: Classification. \
-Step 2: Finding query using Dependency Parser.}
+\f0\b\fs24 \cf0 Problem: 
+\f1\b0 Custom Message or Phrase detection for reminders.
+\f0\b  \
+\
+Data: 
+\f1\b0 A tagged dataset with 9819 tagger pair is available. 1st column has Message. Let us 
+\f0\b call it X
+\f1\b0 . 2nd column has reminder text. Let us 
+\f0\b call it y
+\f1\b0 . eval_data.txt only have one column. 
+\f0\b Call it x
+\f1\b0 . Note: We will be using the same notation throughout this document. \
+\
+
+\f0\b Solution Overview:
+\f1\b0 \
+\
+We will be solving it in two steps. \
+\
+Step 1: Training a text Classifier. \
+Step 2: Finding query using English Parser. Essentially look into structural data (tree) to find commonality.\
+\
+
+\f0\b Solution:\
+\
+Step 1:
+\f1\b0 \
+Our data is in text. Computers can only work with numbers. Do the first step would be to extract features from text. \
+We perform vectorization: which is a process of converting string to feature vector (Bad-of-Words). \
+\
+During counting, we want to find out words that matter and ignore common words like \'91a\'92, \'91the\'92, \'91of\'92 and so on. For that we use something called TFIDF (term frequency, inverse document frequency).\
+ \
+I decided to train a Naive Bayes (NB) classifier with TFIDF feature vectors.\
+For NB, we used first 7000 of X as Train set 
+\f0\b X_train
+\f1\b0 , and rest 2819 as Test set 
+\f0\b X_test. 
+\f1\b0 This will help us find out how good our NB is. Which will help us later compare with other classifiers. \
+\
+Note that Same transformation must be applied on both training set and testing set. So for training Naive Bayes classifier, we actually use training_data.tsv and eval_data.txt both to fit and transform all X_train, X_test, and x. We transform y into a binary vector for every i\'92th element, if any reminder text is found, the value i\'92th element is 1, otherwise 0. \
+If any row of x is classified as 1 (Found reminder text!), the row goes to step 2.  \
+\
+
+\f0\b Step 2:
+\f1\b0  \
+\
+
+\f0\b 2.1 Introduction
+\f1\b0 \
+Every text line that comes to Step 2 has a reminder text. We just have to identify it.\
+\
+I found relation between 1. various labels \'93Noun Phrase\'94, \'93Verb Phrase\'94, \'93Preposition Phrase\'94 in a specific sequence for chunks of text, and 2. determined 
+\f2\i reminder text 
+\f1\i0 in the X. This relation is described as follows. \
+\
+I define a 
+\f0\b close subtree
+\f1\b0  as follows\
+1. 
+\fs22 \cf2 \cb3 \CocoaLigature0 (VB go)\
+2. (NP (DT a) (NN reminder) (NN tomorrow))\
+3. (NP (NN today\
+
+\fs24 \cf0 \cb1 \CocoaLigature1 \
+Parse tree will be referred to as just tree in case not specified otherwise. \
+\
+
+\f0\b 2.2 Algorithm (Method) to find potential reminder text(s)
+\f1\b0 \
+To find reminder text,\
+2.2.1 We first find all close subtree in a parse tree that start with \'91NP\'92. Call is start node.\
+2.2.2 Then we travel up the tree (towards parents), and let \'92S\'92, \'91VB\'92, and \'91PP\'92 labels pass. \
+2.2.3 We stop when we first encounter either \'91VP\'92, or \'91NP\'92. Call it end node.\
+2.2.4 L1 = We take all leaves in the parent subtree of our end node.\
+	  L2 = We take right sibling leaves of of start node, if any.\
+2.2.5 We keep only the nodes that are in L1 and not in L2. If the end node has \'91label\'92, we remove it from L1.\
+\
+L1 is returned as reminder text. \
+\
+
+\f0\b 2.3 Tagging with algorithm described above. 
+\f1\b0 \
+\
+Example 1. \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\fs22 \cf2 \cb3 \CocoaLigature0 (S\
+    (VP\
+      (VB Set)\
+      (NP\
+        (NP (DT a) (NN reminder))\
+        (PP\
+          (IN on)\
+          
+\f0\b (NP\
+            (NP (CD 4) (NN th))
+\f1\b0 \
+            (NP (NNP Dec))\
+            (PP\
+              (IN of)\
+              (S\
+                (VP\
+                  (VBG going)\
+                  (S\
+                    (VP\
+                      (TO to)\
+                      
+\f0\b (VP\
+                        (VB meet)\
+                        (NP (JJ sonal) (NNS miss))
+\f1\b0 \
+                        (PP (IN at) (NP (CD 2:00) (NN pm)))))))))))))))\
+\
+Example 2: \
+(S\
+    (VP\
+      (VB Remind)\
+      (S\
+        (NP (PRP me))\
+        (VP\
+          (TO to)\
+          
+\f0\b (VP\
+            (VB purchase)\
+            (S\
+              (NP (NN shoe) (NN polish))
+\f1\b0 \
+              (ADJP (JJ liquid))\
+              (S\
+                
+\f0\b (VP\
+                  (VBG Date)\
+                  (NP\
+                    (CD :3)\
+                    (NNP Jan)\
+                    (NNP Time)\
+                    (CD :6.30)\
+                    (NN pm)))))
+\f1\b0 ))))))\
+\
+Example 3: \
+(S\
+    (VP\
+      (VB Please)\
+      (VP\
+        (VB remind)\
+        (NP (PRP me))\
+        (PP\
+          (IN for)\
+          
+\f0\b (NP\
+            (NP (JJ internal) (NN audit) (NN review) (NN meeting))
+\f1\b0 \
+            (PP (IN at) (NP (CD 12.45)))))\
+        (NP (NN today))))))\
+\
+Note that in example 1 & 2, multiple chunks qualify for potential reminder text. Call them competition chunks. We do voting on all competitions chunks to determine the final reminder text. \
+\
+
+\f0\b 2.4 Voting in competing chunks.
+\f1\b0  \
+\
+We assign positive and negative votes. A sum of both is assigned as a final vote.\
+\
+Positive Vote: Each chunk gets one positive vote per NN, NNS, JJ tagged words present in chunk.\
+Negative Vote: Each chunk gets one negative vote per CD, DT, In tagged words present in chunk. \
+\
+The chunk which gets maximum vote assigned wins. We return that as final response. \
+}

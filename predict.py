@@ -64,6 +64,15 @@ def classify():
     print len(x), len(predicted)
     #print predicted
 
+def remove_empty(res, resf):
+    i=0
+    while i < len(res):
+        if res[i] == []:
+            del res[i]
+            del resf[i]
+        i=i+1
+    return res, resf
+
 def bruteforce(each_ex):
     return each_ex
 
@@ -82,27 +91,33 @@ def traverse(t, all_leaves, response, response_ref):
             #    print "leaver ", t.parent().leaves()
             #print type(child), type(t.label), type(t.parent)
             try:
-                if child.label() == 'NP':
+                if child.label() in ['NP']:
                     temp = t
-                    while temp.label() in ['S', 'VB']:
+                    while temp.label() in ['S', 'VB', 'PP']:
                         temp = t.parent()
                     if temp.label() in ['VP', 'NP']:
+                        #print '~~~~~~~~ inside .... ~~~~~~~ '
                         if temp.parent().leaves() != all_leaves:
+                            #print '~~~~~~~~ inside 2 .... ~~~~~~~ '
                             asib = temp.parent().leaves()
-                            rsib = child.right_sibling().leaves()
+                            rsib=None
+                            try:
+                                rsib = child.right_sibling().leaves()
+                            except Exception:
+                                fuck='it'
+                            #print '~~~~ ', asib, rsib
                             if rsib != None:
+                                #print '~~~~~~~~ inside 3 .... ~~~~~~~ '
                                 if temp.parent().label() != None:
-                                    if asib[1:asib.index(rsib[0])] not in response:
-                                        response.append(asib[1:asib.index(rsib[0])])
-                                        flag = str(child).split()
-                                        fflag = ' '.join(flag)
-                                        response_ref.append(fflag)
+                                    response.append(asib[1:asib.index(rsib[0])])
                                 else:
-                                    if asib[:asib.index(rsib[0])] not in response:
-                                        response.append(asib[:asib.index(rsib[0])])
-                                        flag = str(child).split()
-                                        fflag = ' '.join(flag)
-                                        response_ref.append(fflag)
+                                    response.append(asib[:asib.index(rsib[0])])
+                            else:
+                                #print '~~~~~~~~ inside 4 .... ~~~~~~~ '
+                                response.append(asib)
+                            flag = str(child).split()
+                            fflag = ' '.join(flag)
+                            response_ref.append(fflag)
 
             except Exception:
                 fuck='it'
@@ -114,33 +129,49 @@ def reminder_phrase(each_ex):
     # --- return: <String> rem_ex
     #result = dependency_parser.raw_parse(each_ex)
     #dep = result.next()
+    rem_ex = ''
     a = list(parser.raw_parse(each_ex))
     # NLTK tree
     pt = ParentedTree.convert(a[0])
-    #print type(pt), len(pt), pt
-    #print 'tree end '
+    print type(pt), len(pt), pt
+    print 'tree end '
     response = []
     response_ref = []
     res, resf = traverse(pt, pt.leaves(), response, response_ref)
+    res, resf = remove_empty(res, resf)
     vote=[]
     if len(res) == 1:
         rem_ex = ' '.join(res[0])
+        if rem_ex == '':
+            rem_ex = bruteforce(each_ex)
     elif len(res) > 1:
+        i=0
         for each in resf:
             vote.append(sum(each.count(x) for x in ['NN', 'NNS', 'JJ']))
+            neg = sum(each.count(x) for x in ['CD', 'DT', 'IN'])
+            vote[i] = vote[i] - neg
+            i=i+1
         rem_ex = ' '.join(res[vote.index(max(vote))])
     else:
         rem_ex = bruteforce(each_ex)
-    #print 'res ', res
-    #print 'ref ', resf
-    #print vote
+    print 'res ', res
+    print 'ref ', resf
+    print vote
     print '* ', rem_ex
-    #print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
 reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
 reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
 reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
+reminder_phrase('Please remind me on Tuesday that I have an appointment at YLG for hair spa at 4.15')
+reminder_phrase('Thanks at least I\'ll remember my loves birthday this time')
+reminder_phrase('Susan dmello meeting with sujit sir remind him Tomorrow')
+reminder_phrase('I need to set reminder to msg babbu at 7 in evening')
+reminder_phrase('Hi give me a reminder to pay LIC Premium on tonight 9 PM')
+reminder_phrase('Remind me to go to bank at 11 am today')
+reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
+
 #reminder_phrase('')
 
 
