@@ -3,6 +3,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 from nltk.parse.stanford import StanfordDependencyParser
+# ------------------------------------------------------------------------------
+# CHANGE THIS VALUE ACCORDING TO YOUR CONFIG
+# ------------------------------------------------------------------------------
 path_to_jar = '../../LBS/LBS-X/lib/stanford-parser/stanford-parser.jar'
 path_to_models_jar = '../../LBS/LBS-X/lib/stanford-parser/stanford-parser-3.6.0-models.jar'
 dependency_parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
@@ -166,7 +169,7 @@ def ensemble():
 # this is done is make testing of a classifier faster
 # for final output, if the output of ensemple classifier is 0, Not Found value
 # is associated to that message text. if 1, we just take the value from
-# raw_eval as it makes testing a Classifier much much faster. 
+# raw_eval as it makes testing a Classifier much much faster.
 # ------------------------------------------------------------------------------
 def pred_all_eval():
     with open('data/eval_data.txt', 'r') as f:
