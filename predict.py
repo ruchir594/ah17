@@ -64,7 +64,10 @@ def classify():
     print len(x), len(predicted)
     #print predicted
 
-def traverse(t, all_leaves):
+def bruteforce(each_ex):
+    return each_ex
+
+def traverse(t, all_leaves, response, response_ref):
     try:
         t.label()
     except AttributeError:
@@ -88,11 +91,23 @@ def traverse(t, all_leaves):
                             asib = temp.parent().leaves()
                             rsib = child.right_sibling().leaves()
                             if rsib != None:
-                                print asib[:asib.index(rsib[0])]
+                                if temp.parent().label() != None:
+                                    if asib[1:asib.index(rsib[0])] not in response:
+                                        response.append(asib[1:asib.index(rsib[0])])
+                                        flag = str(child).split()
+                                        fflag = ' '.join(flag)
+                                        response_ref.append(fflag)
+                                else:
+                                    if asib[:asib.index(rsib[0])] not in response:
+                                        response.append(asib[:asib.index(rsib[0])])
+                                        flag = str(child).split()
+                                        fflag = ' '.join(flag)
+                                        response_ref.append(fflag)
 
             except Exception:
                 fuck='it'
-            traverse(child, all_leaves)
+            traverse(child, all_leaves, response, response_ref)
+    return response, response_ref
 
 def reminder_phrase(each_ex):
     # --- input: <String> each_ex
@@ -102,9 +117,25 @@ def reminder_phrase(each_ex):
     a = list(parser.raw_parse(each_ex))
     # NLTK tree
     pt = ParentedTree.convert(a[0])
-    print type(pt), len(pt), pt
-    traverse(pt, pt.leaves())
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    #print type(pt), len(pt), pt
+    #print 'tree end '
+    response = []
+    response_ref = []
+    res, resf = traverse(pt, pt.leaves(), response, response_ref)
+    vote=[]
+    if len(res) == 1:
+        rem_ex = ' '.join(res[0])
+    elif len(res) > 1:
+        for each in resf:
+            vote.append(sum(each.count(x) for x in ['NN', 'NNS', 'JJ']))
+        rem_ex = ' '.join(res[vote.index(max(vote))])
+    else:
+        rem_ex = bruteforce(each_ex)
+    #print 'res ', res
+    #print 'ref ', resf
+    #print vote
+    print '* ', rem_ex
+    #print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
 reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
