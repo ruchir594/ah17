@@ -9,6 +9,8 @@ dependency_parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_mo
 from nltk.parse.stanford import StanfordParser
 parser=StanfordParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
 
+from nltk.tree import ParentedTree
+
 # common global variables
 # helpful in ensembling
 
@@ -62,24 +64,35 @@ def classify():
     print len(x), len(predicted)
     #print predicted
 
-def get_postagging(parsedData):
-    full_pos = []
-    sent = []
-    for span in parsedData.sents:
-        sent = sent + [parsedData[i] for i in range(span.start, span.end)]
-        #break
+def traverse(t, all_leaves):
+    try:
+        t.label()
+    except AttributeError:
+        return
+    else:
+        for child in t:
+            #print "height ", t.height()
+            #print "label ", t.label()
+            #print "child ", child
+            #print "parent ", t.parent()
+            #if t.parent() != None:
+            #    print "leaver ", t.parent().leaves()
+            #print type(child), type(t.label), type(t.parent)
+            try:
+                if child.label() == 'NP':
+                    temp = t
+                    while temp.label() in ['S', 'VB']:
+                        temp = t.parent()
+                    if temp.label() in ['VP', 'NP']:
+                        if temp.parent().leaves() != all_leaves:
+                            asib = temp.parent().leaves()
+                            rsib = child.right_sibling().leaves()
+                            if rsib != None:
+                                print asib[:asib.index(rsib[0])]
 
-    for token in sent:
-        full_pos.append([token.orth_, token.pos_])
-    return full_pos
-
-def get_dependency(parsedEx):
-    # Let's look at the dependencies of this example:
-    # shown as: original token, dependency tag, head word, left dependents, right dependents
-    full_dep = []
-    for token in parsedEx:
-        full_dep.append([token.orth_, token.dep_, token.head.orth_, [t.orth_ for t in token.lefts], [t.orth_ for t in token.rights]])
-    return full_dep
+            except Exception:
+                fuck='it'
+            traverse(child, all_leaves)
 
 def reminder_phrase(each_ex):
     # --- input: <String> each_ex
@@ -88,14 +101,15 @@ def reminder_phrase(each_ex):
     #dep = result.next()
     a = list(parser.raw_parse(each_ex))
     # NLTK tree
-    pt = a[0]
-    print type(a[0]), len(a[0])
+    pt = ParentedTree.convert(a[0])
+    print type(pt), len(pt), pt
+    traverse(pt, pt.leaves())
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
-#reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
-#reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
-#reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
+reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
+reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
+reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
 #reminder_phrase('')
 
 
