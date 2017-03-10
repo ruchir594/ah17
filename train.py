@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
 from sklearn.externals import joblib
 
 # ------------------------------------------------------------------------------
@@ -40,20 +41,20 @@ while i<len(x):
 # ------------- Hence taking both training_data.tsv & eval_text ----------------
 X_all = X + x
 # ------ This is done so matrix size matches while .(dot) multiplication -------
+#print len(X), len(X_train), len(X_test)
+#print len(y), len(y_train), len(y_test)
+
+count_vect = CountVectorizer()
+count_vect.fit(X_all)
+X_all_counts = count_vect.transform(X_all)
+X_train_counts = count_vect.transform(X_train)
+
+# ----- term frequency (TF) inverse doc frequency ------------------
+
+tfidf_transformer = TfidfTransformer().fit(X_all_counts)
+X_train_tfidf = tfidf_transformer.transform(X_train_counts)
+# ------------------------------------------------------------------------------
 def naive():
-    #print len(X), len(X_train), len(X_test)
-    #print len(y), len(y_train), len(y_test)
-
-    count_vect = CountVectorizer()
-    count_vect.fit(X_all)
-    X_all_counts = count_vect.transform(X_all)
-    X_train_counts = count_vect.transform(X_train)
-
-    # ----- term frequency (TF) inverse doc frequency ------------------
-
-    tfidf_transformer = TfidfTransformer().fit(X_all_counts)
-    X_train_tfidf = tfidf_transformer.transform(X_train_counts)
-
     # ---------------training naive bayes classifier ---------------------------
 
     clf = MultinomialNB().fit(X_train_tfidf, y_train)
@@ -100,4 +101,52 @@ def naive():
     print 'recall ', recall
     print '----------------'
 
+def svm():
+    # ---------------training Support Vector Machine classifier ----------------
+
+    clf = SVC(kernel="linear").fit(X_train_tfidf, y_train)
+
+    # ---------------predict on hold out dataset -------------------------------
+    X_test_counts = count_vect.transform(X_test)
+    X_test_tfidf = tfidf_transformer.transform(X_test_counts)
+
+    print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
+    predicted = clf.predict(X_test_tfidf)
+    joblib.dump(clf, 'models/svm.pkl')
+    print len(predicted)
+    #for doc, category in zip(X_test, predicted):
+    #     print('%r => %s' % (doc, 'Found' if category == 1 else 'Not Found'))
+
+    # -------------checking quality of classifier------------------------------
+
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    j = 0
+    while j < len(X_test):
+        if predicted[j] == 0 and y_test[j] == 0:
+            tn = tn + 1
+        if predicted[j] == 0 and y_test[j] == 1:
+            fn = fn + 1
+        if predicted[j] == 1 and y_test[j] == 1:
+            tp = tp + 1
+        if predicted[j] == 1 and y_test[j] == 0:
+            fp = fp + 1
+        j = j + 1
+    print 'tp ', tp
+    print 'tn ', tn
+    print 'fp ', fp
+    print 'fn ', fn
+    precision = (float(tp)) / (float(tp) + float(fp))
+    recall = (float(tp)) / (float(tp) + float(fn))
+    F1 = 2*precision*recall/(precision+recall)
+    accuracy = float(tp+tn) / float(tp+tn+fp+fn)
+    print 'accuracy ', accuracy
+    print 'F1 ', F1
+    print 'precision', precision
+    print 'recall ', recall
+    print '----------------'
+
 naive()
+svm()
