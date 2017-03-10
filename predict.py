@@ -69,6 +69,25 @@ def classify():
     predicted = clf.predict(X_test_tfidf)
     print len(x), len(predicted)
     #print predicted
+    reminder_text = []
+    i=0
+    with open('raw_eval.txt', 'w') as rev:
+        for each in predicted:
+            if each == 0:
+                a_temp = 'Not Found'
+                a_temp = str(a_temp)
+            else:
+                a_temp = str(reminder_phrase(x[i]))
+                print a_temp, type(a_temp)
+            reminder_text.append(a_temp)
+            rev.write(a_temp+'\n')
+            print i
+            i=i+1
+    with open('eval_predict.tsv', 'w') as f:
+        i=0
+        while i < len(x):
+            f.write(x[i] + '\t' + reminder_phrase[i] + '\n' )
+            i=i+1
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 def remove_empty(res, resf):
@@ -97,16 +116,19 @@ def bruteforce(each_ex, t):
     re_ex=''
     re_words=['reminder', 'remind']
     pos = get_pos(t, getWords(each_ex), [])
+    hold = 3
     for each in pos:
         if each[0] in ['IN', 'PRP', 'TO', 'DT', 'CD']:
             del pos[pos.index(each)]
-        if each[1] in re_words:
+        if each[1].lower() in re_words:
             hold = pos.index(each)
     i=0
     while i<len(pos):
         if i>hold-3 and i<hold+3:
             re_ex = re_ex + pos[i][1] + ' '
         i=i+1
+    if re_ex == '':
+        re_ex = 'Not Found'
     return re_ex
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -127,8 +149,12 @@ def traverse(t, all_leaves, response, response_ref):
             try:
                 if child.label() in ['NP']:
                     temp = t
+                    j=0
                     while temp.label() in ['S', 'VB', 'PP']:
                         temp = t.parent()
+                        j=j+1
+                        if j>5:
+                            break
                     if temp.label() in ['VP', 'NP']:
                         #print '~~~~~~~~ inside .... ~~~~~~~ '
                         if temp.parent().leaves() != all_leaves:
@@ -196,7 +222,7 @@ def reminder_phrase(each_ex):
     return rem_ex
     #print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-print reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
+"""print reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
 print reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
 print reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
 print reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
@@ -206,7 +232,7 @@ print reminder_phrase('Susan dmello meeting with sujit sir remind him Tomorrow')
 print reminder_phrase('I need to set reminder to msg babbu at 7 in evening')
 print reminder_phrase('Hi give me a reminder to pay LIC Premium on tonight 9 PM')
 print reminder_phrase('Remind me to go to bank at 11 am today')
-print reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
+print reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')"""
 
 #print reminder_phrase('')
 
