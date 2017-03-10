@@ -6,6 +6,7 @@ from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.externals import joblib
 
 # ------------------------------------------------------------------------------
@@ -245,10 +246,10 @@ def ada():
     print 'recall ', recall
     print '----------------'
 
-def rfc():
-    # ---------------training Random Forest classifier --------------------
+def svm_nl():
+    # ---------------training QuadraticDiscriminantAnalysis classifier --------------------
 
-    clf =  RandomForestClassifier(max_depth=15, n_estimators=50, max_features=1).fit(X_train_tfidf, y_train)
+    clf =  SVC(gamma=2, C=1).fit(X_train_tfidf, y_train)
 
     # ---------------predict on hold out dataset -------------------------------
     X_test_counts = count_vect.transform(X_test)
@@ -256,7 +257,7 @@ def rfc():
 
     print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
     predicted = clf.predict(X_test_tfidf)
-    joblib.dump(clf, 'models/rfc.pkl')
+    joblib.dump(clf, 'models/svm_nl.pkl')
     print len(predicted)
     #for doc, category in zip(X_test, predicted):
     #     print('%r => %s' % (doc, 'Found' if category == 1 else 'Not Found'))
@@ -295,4 +296,4 @@ def rfc():
 #svm()
 #mlp()
 #ada()
-rfc()
+svm_nl()

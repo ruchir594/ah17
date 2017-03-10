@@ -218,7 +218,22 @@ precision 0.879883381924\
 recall  0.877325581395\
 \
 
-\f0\b 1.2.U MLP Classifier
+\f0\b 1.2.U Non Linear SVM (Radial Basis Function)
+\f1\b0 \
+\
+Performance\
+2819\
+tp  1616\
+tn  799\
+fp  300\
+fn  104\
+accuracy  0.856686768358\
+F1  0.888888888889\
+precision 0.843423799582\
+recall  0.939534883721\
+\
+
+\f0\b 1.3.U MLP Classifier
 \f1\b0 \
 \
 Performance \
@@ -232,7 +247,9 @@ F1  0.869907277325\
 precision 0.84176182708\
 recall  0.9\
 \
-1.3.U Adaboost\
+
+\f0\b 1.4.U Adaboost
+\f1\b0 \
 \
 Performance\
 2819\
@@ -245,7 +262,18 @@ F1  0.864283638477\
 precision 0.864032539221\
 recall  0.864534883721\
 \
-1.4.U Badly Performed Classifier\
+
+\f0\b 1.5.U Badly Performed Classifier
+\f1\b0 \
 \
 KNN and Random Forest Performed Badly.\
+\
+
+\f0\b 1.6.U Ensembling
+\f1\b0  \
+\
+Kaggle defines Ensembling as a general term for combining various classifier by averaging or voting. We will be voting. The Netflix Prize, a first of its kind competition made the Ensembling famous. \
+\
+We are going to make 5 of our top performing classifiers to vote on final prediction out of Step 1, I.e. to determine if a reminder text has been found or not. \
+\
 }

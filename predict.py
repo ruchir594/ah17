@@ -8,6 +8,7 @@ path_to_models_jar = '../../LBS/LBS-X/lib/stanford-parser/stanford-parser-3.6.0-
 dependency_parser = StanfordDependencyParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
 from nltk.parse.stanford import StanfordParser
 parser=StanfordParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
+from collections import Counter
 
 from nltk.tree import ParentedTree
 import re, nltk
@@ -93,6 +94,39 @@ def classify():
         while i < len(x):
             f.write(x[i] + '\t' + reminder_phrase[i] + '\n' )
             i=i+1"""
+def ensemble():
+    clf1 = joblib.load('models/nb.pkl')
+    clf2 = joblib.load('models/svm.pkl')
+    clf3 = joblib.load('models/svm_nl.pkl')
+    clf4 = joblib.load('models/nn.pkl')
+    clf5 = joblib.load('models/adaboost.pkl')
+    with open('data/eval_data.txt', 'r') as f:
+        x = f.readlines()
+    i=0
+    while i<len(x):
+        x[i]=unicode(x[i][:-1],'utf-8') # ---- removing '\n' ----
+        i=i+1
+    print len(x), type(x)
+
+    # ------------- transform TFIDF --------------------------------------------
+
+    X_test_counts = count_vect.transform(x)
+    print X_test_counts.shape
+    X_test_tfidf = tfidf_transformer.transform(X_test_counts)
+    print X_test_tfidf.shape
+
+    predicted1 = clf1.predict(X_test_tfidf)
+    predicted2 = clf2.predict(X_test_tfidf)
+    predicted3 = clf3.predict(X_test_tfidf)
+    predicted4 = clf4.predict(X_test_tfidf)
+    predicted5 = clf5.predict(X_test_tfidf)
+    print len(x), len(predicted1)
+    print np.count_nonzero(predicted1)
+    with open('raw_pred_ens.txt','w') as f:
+        for w1,w2,w3,w4,w5 in zip(predicted1, predicted2, predicted3, predicted4, predicted5):
+            c = Counter([w1,w2,w3,w4,w5])
+            value, count = c.most_common()[0]
+            f.write(str(value)+'\n')
 
 def pred_all_eval():
     with open('data/eval_data.txt', 'r') as f:
@@ -252,5 +286,6 @@ print reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
 #print reminder_phrase('')
 
 
-classify()
-pred_all_eval()
+#classify()
+#pred_all_eval()
+ensemble()
