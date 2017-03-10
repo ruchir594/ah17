@@ -31,7 +31,7 @@ Step 2: Finding query using English Parser. Essentially look into structural dat
 
 \f0\b Solution:\
 \
-Step 1:
+Step 1: Classification
 \f1\b0 \
 Our data is in text. Computers can only work with numbers. Do the first step would be to extract features from text. \
 We perform vectorization: which is a process of converting string to feature vector (Bad-of-Words). \
@@ -171,7 +171,13 @@ Note that in example 1 & 2, multiple chunks qualify for potential reminder text.
 We assign positive and negative votes. A sum of both is assigned as a final vote.\
 \
 Positive Vote: Each chunk gets one positive vote per NN, NNS, JJ tagged words present in chunk.\
-Negative Vote: Each chunk gets one negative vote per CD, DT, In tagged words present in chunk. \
+Negative Vote: Each chunk gets one negative vote per CD, DT, IN tagged words present in chunk. \
 \
 The chunk which gets maximum vote assigned wins. We return that as final response. \
+\
+
+\f0\b 2.5 Exceptions
+\f1\b0 \
+\
+Some sentences like \'93Susan dmello meeting with sujit sir remind him Tomorrow\'94 will not be tagged at all due to poor grammatical structure. We have method called \'93bruteforce()\'94 which is a hard coded piece of work which tries to extract a dependency text by removing common tagged words DT, IN, TO, and removes a set of words from a list. \
 }

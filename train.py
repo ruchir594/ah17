@@ -4,9 +4,10 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.externals import joblib
 
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # common global variables
 # helpful in ensembling
-
 with open('data/training_impro.tsv','r') as tsv:
     mat = [line.strip().split('\t') for line in tsv]
 #mat = pd.read_csv('data/training_impro.tsv',sep='\t')
@@ -98,5 +99,5 @@ def naive():
     print 'precision', precision
     print 'recall ', recall
     print '----------------'
-    
+
 naive()

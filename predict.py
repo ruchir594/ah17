@@ -10,6 +10,11 @@ from nltk.parse.stanford import StanfordParser
 parser=StanfordParser(path_to_jar=path_to_jar, path_to_models_jar=path_to_models_jar)
 
 from nltk.tree import ParentedTree
+import re, nltk
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def getWords(data):
+    return re.compile(r"[\w']+").findall(data)
 
 # common global variables
 # helpful in ensembling
@@ -42,7 +47,8 @@ count_vect = CountVectorizer()
 count_vect.fit(X_all)
 X_all_counts = count_vect.transform(X_all)
 tfidf_transformer = TfidfTransformer().fit(X_all_counts)
-
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def classify():
     clf = joblib.load('models/nb.pkl')
     with open('data/eval_data.txt', 'r') as f:
@@ -63,7 +69,8 @@ def classify():
     predicted = clf.predict(X_test_tfidf)
     print len(x), len(predicted)
     #print predicted
-
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def remove_empty(res, resf):
     i=0
     while i < len(res):
@@ -73,9 +80,36 @@ def remove_empty(res, resf):
         i=i+1
     return res, resf
 
-def bruteforce(each_ex):
-    return each_ex
+# ------------------------------------------------------------------------------
+# ------- recursive function to extract POS tagg from  Parse tree --------------
+# ------------------------------------------------------------------------------
+def get_pos(t, words, pos):
+    for subtree in t:
+        if type(subtree) == nltk.tree.Tree:
+            if subtree.height() == 2:   #child nodes
+                pos.append(str(subtree).replace("(", "").replace(")", "").split())
+            get_pos(subtree, words, pos)
+    return pos
 
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def bruteforce(each_ex, t):
+    re_ex=''
+    re_words=['reminder', 'remind']
+    pos = get_pos(t, getWords(each_ex), [])
+    for each in pos:
+        if each[0] in ['IN', 'PRP', 'TO', 'DT', 'CD']:
+            del pos[pos.index(each)]
+        if each[1] in re_words:
+            hold = pos.index(each)
+    i=0
+    while i<len(pos):
+        if i>hold-3 and i<hold+3:
+            re_ex = re_ex + pos[i][1] + ' '
+        i=i+1
+    return re_ex
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def traverse(t, all_leaves, response, response_ref):
     try:
         t.label()
@@ -123,7 +157,8 @@ def traverse(t, all_leaves, response, response_ref):
                 fuck='it'
             traverse(child, all_leaves, response, response_ref)
     return response, response_ref
-
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def reminder_phrase(each_ex):
     # --- input: <String> each_ex
     # --- return: <String> rem_ex
@@ -133,8 +168,8 @@ def reminder_phrase(each_ex):
     a = list(parser.raw_parse(each_ex))
     # NLTK tree
     pt = ParentedTree.convert(a[0])
-    print type(pt), len(pt), pt
-    print 'tree end '
+    #print type(pt), len(pt), pt
+    #print 'tree end '
     response = []
     response_ref = []
     res, resf = traverse(pt, pt.leaves(), response, response_ref)
@@ -143,7 +178,7 @@ def reminder_phrase(each_ex):
     if len(res) == 1:
         rem_ex = ' '.join(res[0])
         if rem_ex == '':
-            rem_ex = bruteforce(each_ex)
+            rem_ex = bruteforce(each_ex, a[0])
     elif len(res) > 1:
         i=0
         for each in resf:
@@ -153,26 +188,27 @@ def reminder_phrase(each_ex):
             i=i+1
         rem_ex = ' '.join(res[vote.index(max(vote))])
     else:
-        rem_ex = bruteforce(each_ex)
-    print 'res ', res
-    print 'ref ', resf
-    print vote
-    print '* ', rem_ex
-    print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        rem_ex = bruteforce(each_ex, a[0])
+    #print 'res ', res
+    #print 'ref ', resf
+    #print vote
+    #print '* ', rem_ex
+    return rem_ex
+    #print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
-reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
-reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
-reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
-reminder_phrase('Please remind me on Tuesday that I have an appointment at YLG for hair spa at 4.15')
-reminder_phrase('Thanks at least I\'ll remember my loves birthday this time')
-reminder_phrase('Susan dmello meeting with sujit sir remind him Tomorrow')
-reminder_phrase('I need to set reminder to msg babbu at 7 in evening')
-reminder_phrase('Hi give me a reminder to pay LIC Premium on tonight 9 PM')
-reminder_phrase('Remind me to go to bank at 11 am today')
-reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
+print reminder_phrase('Set a reminder on 4 th Dec of going to meet sonal miss at 2:00 pm')
+print reminder_phrase('Remind me to purchase shoe polish liquid Date:3 Jan Time:6.30 pm')
+print reminder_phrase('Please remind me for internal audit review meeting at 12.45 today')
+print reminder_phrase('And a reminder tomorrow at 11.30 am to go through basic codings and share markets.')
+print reminder_phrase('Please remind me on Tuesday that I have an appointment at YLG for hair spa at 4.15')
+print reminder_phrase('Thanks at least I\'ll remember my loves birthday this time')
+print reminder_phrase('Susan dmello meeting with sujit sir remind him Tomorrow')
+print reminder_phrase('I need to set reminder to msg babbu at 7 in evening')
+print reminder_phrase('Hi give me a reminder to pay LIC Premium on tonight 9 PM')
+print reminder_phrase('Remind me to go to bank at 11 am today')
+print reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
 
-#reminder_phrase('')
+#print reminder_phrase('')
 
 
 #classify()
