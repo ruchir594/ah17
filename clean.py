@@ -1,3 +1,20 @@
+# ------------------------------------------------------------------------------
+# raw_pred_ens = output of Classifier
+# raw_eval = output of Parser
+
+# the reason for doing separate parser output is that it helps a LOT,
+# It makes testing a classifier much much faster.
+
+# raw_eval file already contains possible reminder text for each message
+# This function "clean" reads the input of raw_pred_ens, which is a binary
+# vector of size of eval_data, if the value of raw_pred_ens is 1, reminder text
+# from that message much be found.
+
+# output
+# gives eval_pred_ens file which is in TSV format. 
+
+
+# ------------------------------------------------------------------------------
 def clean():
     with open('data/eval_data.txt', 'r') as f:
         x = f.readlines()

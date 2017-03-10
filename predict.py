@@ -50,9 +50,18 @@ count_vect.fit(X_all)
 X_all_counts = count_vect.transform(X_all)
 tfidf_transformer = TfidfTransformer().fit(X_all_counts)
 # ------------------------------------------------------------------------------
+# simple classifier
+# input
+# name of the model to be used
+
+# output
+# a file eval_pred.txt
+# each row is either 1 or 0.
+# 1 if classied as some response text must be there
+# 0 if Not found
 # ------------------------------------------------------------------------------
-def classify():
-    clf = joblib.load('models/nb.pkl')
+def classify(model_name):
+    clf = joblib.load('models/'+model_name+'.pkl')
     with open('data/eval_data.txt', 'r') as f:
         x = f.readlines()
     i=0
@@ -94,6 +103,30 @@ def classify():
         while i < len(x):
             f.write(x[i] + '\t' + reminder_phrase[i] + '\n' )
             i=i+1"""
+# ------------------------------------------------------------------------------
+# Section 1.6.U
+
+# input
+# reads 6 files.
+# Five predefined model
+# 1. Naive Bayes
+# 2. Linear SVM
+# 3. RBF svm
+# 4. MultiLayer Perceptron
+# 5. Adaboost
+
+# and the eval_data file
+
+# output
+# a file eval_pred_ens.txt
+# each row is either 1 or 0.
+# 1 if classied as some response text must be there
+# 0 if Not found
+
+# Takes best 5 Classifier models
+# Voting takes place
+# May the best prediction win
+# ------------------------------------------------------------------------------
 def ensemble():
     clf1 = joblib.load('models/nb.pkl')
     clf2 = joblib.load('models/svm.pkl')
@@ -123,11 +156,18 @@ def ensemble():
     print len(x), len(predicted1)
     print np.count_nonzero(predicted1)
     with open('raw_pred_ens.txt','w') as f:
+        # ~~ as Section 1.6.U in ./docs/approach, a voting of 5 best algo takes place
         for w1,w2,w3,w4,w5 in zip(predicted1, predicted2, predicted3, predicted4, predicted5):
             c = Counter([w1,w2,w3,w4,w5])
             value, count = c.most_common()[0]
             f.write(str(value)+'\n')
-
+# ------------------------------------------------------------------------------
+# reads every message in eval_data and writes a potential reminder text
+# this is done is make testing of a classifier faster
+# for final output, if the output of ensemple classifier is 0, Not Found value
+# is associated to that message text. if 1, we just take the value from
+# raw_eval as it makes testing a Classifier much much faster. 
+# ------------------------------------------------------------------------------
 def pred_all_eval():
     with open('data/eval_data.txt', 'r') as f:
         x = f.readlines()
@@ -138,6 +178,7 @@ def pred_all_eval():
             print i
             i=i+1
 # ------------------------------------------------------------------------------
+# removed an empty element in array res
 # ------------------------------------------------------------------------------
 def remove_empty(res, resf):
     i=0
@@ -160,6 +201,9 @@ def get_pos(t, words, pos):
     return pos
 
 # ------------------------------------------------------------------------------
+# this funcation is called as a last resort.
+# when our Parser based approach cannot find the response text, we turn to
+# POS Tagger approach and a bit of hacking.
 # ------------------------------------------------------------------------------
 def bruteforce(each_ex, t):
     re_ex=''
@@ -180,6 +224,17 @@ def bruteforce(each_ex, t):
         re_ex = 'Not Found'
     return re_ex
 # ------------------------------------------------------------------------------
+# Input:
+# t: Parse Tree
+# all_leaver: a List with all the leaves in the tree
+# response: Empty Array
+# response_ref: Empty Array
+
+# Output:
+# response: An array with possible leaves of a subtree
+# response_ref: Leaves with POS information to each leaf
+
+# Based on Section 2.2 in ./doc/approach
 # ------------------------------------------------------------------------------
 def traverse(t, all_leaves, response, response_ref):
     try:
@@ -196,14 +251,17 @@ def traverse(t, all_leaves, response, response_ref):
             #    print "leaver ", t.parent().leaves()
             #print type(child), type(t.label), type(t.parent)
             try:
+                # ~~ Section 2.2.1 in ./doc/approach
                 if child.label() in ['NP']:
                     temp = t
                     j=0
+                    # ~~ Section 2.2.2 in ./doc/approach
                     while temp.label() in ['S', 'VB', 'PP']:
                         temp = t.parent()
                         j=j+1
                         if j>5:
                             break
+                    # ~~ Section 2.2.3 in ./doc/approach
                     if temp.label() in ['VP', 'NP']:
                         #print '~~~~~~~~ inside .... ~~~~~~~ '
                         if temp.parent().leaves() != all_leaves:
@@ -215,6 +273,7 @@ def traverse(t, all_leaves, response, response_ref):
                             except Exception:
                                 fuck='it'
                             #print '~~~~ ', asib, rsib
+                            # ~~ Section 2.2.4 & 2.2.5 in ./doc/approach
                             if rsib != None:
                                 #print '~~~~~~~~ inside 3 .... ~~~~~~~ '
                                 if temp.parent().label() != None:
@@ -233,10 +292,13 @@ def traverse(t, all_leaves, response, response_ref):
             traverse(child, all_leaves, response, response_ref)
     return response, response_ref
 # ------------------------------------------------------------------------------
+# input
+# Each_ex: Message text input
+
+# output
+# rem_ex: reminder text
 # ------------------------------------------------------------------------------
 def reminder_phrase(each_ex):
-    # --- input: <String> each_ex
-    # --- return: <String> rem_ex
     #result = dependency_parser.raw_parse(each_ex)
     #dep = result.next()
     rem_ex = ''
@@ -257,8 +319,11 @@ def reminder_phrase(each_ex):
     elif len(res) > 1:
         i=0
         for each in resf:
+            # ~~ Section 2.4 Voting for best chunk
             vote.append(sum(each.count(x) for x in ['NN', 'NNS', 'JJ']))
             neg = sum(each.count(x) for x in ['CD', 'DT', 'IN'])
+            # positive votes are appended. And negative votes are subtracted
+            # from same var place
             vote[i] = vote[i] - neg
             i=i+1
         rem_ex = ' '.join(res[vote.index(max(vote))])
@@ -286,6 +351,6 @@ print reminder_phrase('Remind me to buy eggs on next Monday and Tuesday at 9pm')
 #print reminder_phrase('')
 
 
-#classify()
+#classify('nn')
 #pred_all_eval()
 ensemble()
