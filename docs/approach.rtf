@@ -1,8 +1,10 @@
 {\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf810
 {\fonttbl\f0\fnil\fcharset0 Menlo-Bold;\f1\fnil\fcharset0 Menlo-Regular;\f2\fnil\fcharset0 Menlo-Italic;
 }
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;}
-{\*\expandedcolortbl;;\csgray\c0;\csgray\c100000;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;\red0\green0\blue0;
+\red255\green255\blue255;}
+{\*\expandedcolortbl;;\csgray\c0;\csgray\c100000;\csgenericrgb\c0\c0\c0;
+\cssrgb\c100000\c100000\c100000;}
 \paperw11900\paperh16840\margl1440\margr1440\vieww19180\viewh11380\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
 
@@ -181,8 +183,9 @@ Example 3: \
 \
 Note that in example 1 & 2, multiple chunks qualify for potential reminder text. Call them competition chunks. We do voting on all competitions chunks to determine the final reminder text. \
 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\b 2.4 Voting in competing chunks.
+\f0\b \cf2 2.4 Voting in competing chunks.
 \f1\b0  \
 \
 We assign positive and negative votes. A sum of both is assigned as a final vote.\
@@ -199,13 +202,15 @@ The chunk which gets maximum vote assigned wins. We return that as final respons
 Some sentences like \'93Susan dmello meeting with sujit sir remind him Tomorrow\'94 will not be tagged at all due to poor grammatical structure. We have method called \'93bruteforce()\'94 which is a hard coded piece of work which tries to extract a dependency text by removing common tagged words DT, IN, TO, and removes a set of words from a list. \
 \
 
-\f0\b Step 1 Updates:\
+\f0\b Step 1: Updates on Classification\
 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f1\b0 With more time on our hand, we tried other classification algorithms. \
+\f1\b0 \cf2 With more time on our hand, we tried other classification algorithms. \
 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\b 1.1.U Linear SVM
+\f0\b \cf2 1.1.U Linear SVM
 \f1\b0 \
 \
 Performance \
@@ -289,16 +294,41 @@ precision 0.881062355658\
 recall  0.887209302326\
 \
 
-\f0\b Conclusion \
+\f0\b Step 3: Results
+\f1\b0 \
+\
+Output of Classifier is stored in raw_pred_ens.txt which is a binary vector.\
+Independent parsing with possible reminder text for message text is stored in a separate file. (raw_eval.txt)\
+\
+For final result, if the classifier output is 1, we find the corresponding reminder text from raw_eval.txt or associate \'93Not Found\'94.\
+\
 \
 
-\f1\b0 In code, For classifier, first thing we do is squash the training_data\'92s labels to \'93Found\'94 and \'93Not Found\'94. \
+\f0\b Conclusion \
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f0\b \
+\f1\b0 \cf2 In code, For classifier, first thing we do is squash the training_data\'92s labels to \'93Found\'94 and \'93Not Found\'94. \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f1\b0 In code, note that we run parser on eval_data.txt independently, and only once. This allows us to run classifier independently and save time as whenever classifier predicts 1 on message text, corresponding reminder text need not be calculated again using Stanford parser as it is heavy. \
+\f0\b \cf2 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1\b0 \cf2 In code, note that we run parser on eval_data.txt independently, and only once. This allows us to run classifier independently and save time as whenever classifier predicts 1 on message text, corresponding reminder text need not be calculated again using Stanford parser as it is heavy. \
 \
 With ensembling, we get the best classification accuracy, with X_train and X_test\
 Hence we use the same ensembling voting scheme to vote on eval_data.txt\
 \
+\pard\pardeftab720\partightenfactor0
+
+\f0\b \cf4 \cb5 \expnd0\expndtw0\kerning0
+\CocoaLigature1 Possible improvement on current results
+\f1\b0 \
+\
+Running\
+1. Run autocorrect on words\
+2. Run autocorrect on sentence \
+Before we parsing each might result in better reminder_text identification. \
+\
+Another way to possibly improve identifying of reminder text would be to try and train a LSTM Recurrent Neural Network. The beauty of LSTM RNN would be that it would possibly give consistent results if trained on a large chunk of data (2-3 MB is considered good enough data to train a character prediction model). I believe training a RNN in such a way that when Prompted with an incoming message text, it would respond with possible reminder text; would result in possibly consistent identification of reminder text. It would be very interesting to try. \
 }

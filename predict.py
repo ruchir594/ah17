@@ -157,7 +157,7 @@ def ensemble():
     predicted5 = clf5.predict(X_test_tfidf)
     print len(x), len(predicted1)
     print np.count_nonzero(predicted1)
-    # --- writing in file
+    # --- writing in file for cleap.py to use
     with open('raw_pred_ens.txt','w') as f:
         # ~~ as Section 1.6.U in ./docs/approach, a voting of 5 best algo takes place
         for w1,w2,w3,w4,w5 in zip(predicted1, predicted2, predicted3, predicted4, predicted5):
@@ -304,6 +304,8 @@ def traverse(t, all_leaves, response, response_ref):
 def reminder_phrase(each_ex):
     #result = dependency_parser.raw_parse(each_ex)
     #dep = result.next()
+    if each_ex == '':
+        return 'Not Found'
     rem_ex = ''
     a = list(parser.raw_parse(each_ex))
     # NLTK tree

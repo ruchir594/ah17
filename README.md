@@ -31,23 +31,27 @@ path_to_models_jar = '../../LBS/LBS-X/lib/stanford-parser/stanford-parser-3.6.0-
 Point to folder where you have downloaded the Stanford Parser
 
 # Running
+
+### parse.py
 run only once
 ```
 python parse.py
 ```
-this is Entire Step 2 in ./doc/approach.
-We only need to run this once, because we only need to parse and try to find reminder text to corresponsing message text only once. Saving time.
+It is implementation of Step 2 in ./doc/approach.
+
+We only need to run this once, because we only need to parse and try to find reminder text to corresponding message text only once. Saving time.
 We do classification independently and this helps us save time because Whenever classifier classifies a message text as 1, we just get that reminder text of the corresponding message text.
 
-open train.py file.
+### train.py
 uncomment or comment different functions at the bottom of the file to build learning models.
 run it to build models which will be saved in ./models/
 
-open predict.py file.
+### predict.py
 either use classify('name') function to independently classify the eval_data.txt
 or run 5 classifier in file train.py, and run predict.py to predict best classification using direct voting ensembling.
 
-then run clean.py.
+### clean.py
+It is implementation of Step 2 in ./doc/approach.
 
 directly running following will work too.
 ```

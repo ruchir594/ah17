@@ -1,3 +1,6 @@
+# This squashes the Label in training_data to either "Found" or "Not Found"
+# I later realised that it is not exactly very useful.
+# With a tiny change in Train.py, this can be reduced to none.
 with open('data/training_data.tsv','r') as tsv:
     mat = [line.strip().split('\t') for line in tsv]
     x=[]

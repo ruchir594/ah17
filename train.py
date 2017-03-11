@@ -70,6 +70,7 @@ def naive():
 
     print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
     predicted = clf.predict(X_test_tfidf)
+    # writing in file for predict.py to use
     joblib.dump(clf, 'models/nb.pkl')
     print len(predicted)
     #for doc, category in zip(X_test, predicted):
@@ -117,6 +118,7 @@ def svm():
 
     print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
     predicted = clf.predict(X_test_tfidf)
+    # writing in file for predict.py to use
     joblib.dump(clf, 'models/svm.pkl')
     print len(predicted)
     #for doc, category in zip(X_test, predicted):
@@ -164,6 +166,7 @@ def mlp():
 
     print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
     predicted = clf.predict(X_test_tfidf)
+    # writing in file for predict.py to use
     joblib.dump(clf, 'models/mlp.pkl')
     print len(predicted)
     #for doc, category in zip(X_test, predicted):
@@ -211,6 +214,7 @@ def ada():
 
     print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
     predicted = clf.predict(X_test_tfidf)
+    # writing in file for predict.py to use
     joblib.dump(clf, 'models/adaboost.pkl')
     print len(predicted)
     #for doc, category in zip(X_test, predicted):
@@ -248,7 +252,7 @@ def ada():
     print '----------------'
 
 def svm_nl():
-    # ---------------training QuadraticDiscriminantAnalysis classifier --------------------
+    # ---------------training RBF SVM classifier --------------------
 
     clf =  SVC(gamma=2, C=1).fit(X_train_tfidf, y_train)
 
@@ -258,6 +262,7 @@ def svm_nl():
 
     print X_train_tfidf.shape, X_test_tfidf.shape, X_all_counts.shape
     predicted = clf.predict(X_test_tfidf)
+    # writing in file for predict.py to use
     joblib.dump(clf, 'models/svm_nl.pkl')
     print len(predicted)
     #for doc, category in zip(X_test, predicted):
@@ -293,12 +298,13 @@ def svm_nl():
     print 'precision', precision
     print 'recall ', recall
     print '----------------'
-naive()
-svm()
-mlp()
-ada()
-svm_nl()
 
+
+# ------------------------------------------------------------------------------
+# The following function is used to measure the effectiveness of ensembling
+# We make multiple combination of models vote on final outcome of classifier
+# Measure accuracy on X_Test
+# ------------------------------------------------------------------------------
 
 def ens_x_text():
     clf1 = joblib.load('models/nb.pkl')
@@ -366,4 +372,9 @@ def ens_x_text():
     print 'recall ', recall
     print '----------------'
 
+naive()
+svm()
+mlp()
+ada()
+svm_nl()
 #ens_x_text()

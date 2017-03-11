@@ -67,15 +67,21 @@ def get_pos(t, words, pos):
 # ------------------------------------------------------------------------------
 def bruteforce(each_ex, t):
     re_ex=''
-    re_words=['reminder', 'remind']
+    re_words=['reminder', 'remind', 'reminded']
     pos = get_pos(t, getWords(each_ex), [])
+    # initialized to average median
     hold = 3
     for each in pos:
+        # we want to remove words with inderior tags that are likely to not
+        # carry meaningful information
         if each[0] in ['IN', 'PRP', 'TO', 'DT', 'CD']:
             del pos[pos.index(each)]
+        # Try to find the activation
+        # this can potentially be improved by using Word2Vec
         if each[1].lower() in re_words:
             hold = pos.index(each)
     i=0
+    # find 4 words before and after the activated word
     while i<len(pos):
         if i>hold-3 and i<hold+3:
             re_ex = re_ex + pos[i][1] + ' '
@@ -149,6 +155,7 @@ def traverse(t, all_leaves, response, response_ref):
 
             except Exception:
                 fuck='it'
+            # recursive call
             traverse(child, all_leaves, response, response_ref)
     return response, response_ref
 # ------------------------------------------------------------------------------
